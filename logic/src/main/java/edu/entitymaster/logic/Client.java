@@ -23,6 +23,6 @@ public class Client {
     }
 
     public String read() {
-        return name;
+        return name;       //+ number + etc
     }
 }
