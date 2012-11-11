@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface ClientRepository {
     public Boolean createClient(Client client);
-    public List<Client> readClients();
+    public List<String> readClients();
     public Boolean updateClient(Client srcClient, Client destClient);
     public Boolean deleteClient(Client client);
 }
