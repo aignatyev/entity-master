@@ -1,12 +1,12 @@
 package edu.entitymaster.logic;
 
+import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.io.Files;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,12 +16,14 @@ import com.google.common.io.Files;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientService implements ClientRepository {
-    private File file = null;// = new File(System.getProperty("user.dir") + "ClientRepository.csv");
+    private File file = null;// = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
+    private List<Client> clients = new ArrayList<Client>();
 
     public ClientService(File f) {
         try {
             Files.touch(f);
             file = f;
+            clients = readClients();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,68 +34,51 @@ public class ClientService implements ClientRepository {
             File f = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
             Files.touch(f);
             file = f;
+            clients = readClients();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public Boolean createClient(Client client) {
-        try {
-            Files.append(client.read() + "\n", file, Charset.defaultCharset());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
+        clients.add(client);
+        return save();
     }
 
-    public List<String> readClients() {
-        List<String> clientsRead = new ArrayList<String>();
-        List<Client> clients = new ArrayList<Client>();
-        try {
-            clientsRead = Files.readLines(file, Charset.defaultCharset());
-            /*for (String line : clientsRead) {
-                String name = line.split(",")[0];
-                clients.add(new Client(name));
-            }*/
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return clientsRead;
+    public List<Client> readClients() {
+        return clients;
     }
 
     public Boolean updateClient(Client srcClient, Client destClient) {
-        /*CharBuffer charBuffer = Files.map(file, FileChannel.MapMode.READ_WRITE).asCharBuffer();
-        charBuffer.put(charBuffer., destClient);
-        */
-        List<String> clients = readClients();
-        clients.set(clients.indexOf(srcClient.read()), destClient.read());
-
-        return save(clients);
+        clients.set(clients.indexOf(srcClient), destClient);
+        return save();
     }
 
-    private Boolean save(List<String> clients) {
+    public Boolean deleteClient(Client client) {
+        if (clients.remove(client)) {
+            return save();
+        }
+        return false;
+    }
+
+    private Boolean save() {
+        File tmpFile = new File(System.getProperty("user.dir") + "\\ClientRepositoryTmp.csv");
         try {
-            Files.write("", file, Charset.defaultCharset());
+            Files.touch(tmpFile);
+            Files.write("", tmpFile, Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            for (String client : clients)
-                Files.append(client, file, Charset.defaultCharset());
+            for (Client client : clients)
+                Files.append(client.read(), tmpFile, Charset.defaultCharset());
+            Files.copy(tmpFile, file);
+            tmpFile.delete();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
         return true;
-    }
-
-    public Boolean deleteClient(Client client) {
-        List<String> clients = readClients();
-        if (clients.remove(client.read())) {
-            return save(clients);
-        }
-        return false;
     }
 
     public void deleteClientRepository(File file) {

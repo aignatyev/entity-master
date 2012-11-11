@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.sql.Time;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -21,7 +22,7 @@ import static junit.framework.Assert.assertTrue;
 public class TestClientService {
     ClientService clientService;
     Client client = new Client("test");
-    Client client2 = new Client("test2");
+    Client client2 = new Client("2test2");
 
     @Before
     public void setUp() {
@@ -36,21 +37,21 @@ public class TestClientService {
     @Test
     public void testCreateClient() {
         assertTrue(clientService.createClient(client));
-        assertTrue(clientService.readClients().contains(client.read()));
+        assertTrue(clientService.readClients().contains(client));
     }
 
     @Test
     public void testUpdateClient() {
         clientService.createClient(client);
         assertTrue(clientService.updateClient(client, client2));
-        assertTrue(clientService.readClients().contains(client2.read()));
-        assertFalse(clientService.readClients().contains(client.read()));
+        assertTrue(clientService.readClients().contains(client2));
+        assertFalse(clientService.readClients().contains(client));
     }
 
     @Test
     public void testDeleteClient() {
         clientService.createClient(client);
         assertTrue(clientService.deleteClient(client));
-        assertFalse(clientService.readClients().contains(client.read()));
+        assertFalse(clientService.readClients().contains(client));
     }
 }
