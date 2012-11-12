@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -62,7 +63,7 @@ public class ClientService implements ClientRepository {
     }
 
     private Boolean save() {
-        File tmpFile = new File(System.getProperty("user.dir") + "\\ClientRepositoryTmp.csv");
+        File tmpFile = new File(System.getProperty("user.dir") + "\\ClientRepositoryTmp" + Calendar.getInstance().getTimeInMillis() + ".csv");
         try {
             Files.touch(tmpFile);
             Files.write("", tmpFile, Charset.defaultCharset());

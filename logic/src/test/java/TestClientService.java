@@ -1,14 +1,11 @@
 import edu.entitymaster.logic.Client;
 import edu.entitymaster.logic.ClientService;
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.sql.Time;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -26,12 +23,14 @@ public class TestClientService {
 
     @Before
     public void setUp() {
-        clientService = new ClientService(new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
+        clientService = new ClientService(
+                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
     }
 
     @After
     public void tearDown() {
-        clientService.deleteClientRepository(new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
+        clientService.deleteClientRepository(
+                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
     }
 
     @Test
