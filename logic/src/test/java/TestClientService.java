@@ -9,6 +9,7 @@ import java.util.Calendar;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -39,6 +40,7 @@ public class TestClientService {
     @Test
     public void testCreateClient() {
         assertTrue(clientService.createClient(client));
+        assertThat(clientService.getClients().size(), is(1));
         assertTrue(clientService.getClients().contains(client));
     }
 
@@ -46,6 +48,7 @@ public class TestClientService {
     public void testUpdateClient() {
         clientService.createClient(client);
         assertTrue(clientService.updateClient(client, client2));
+        assertThat(clientService.getClients().size(), is(1));
         assertTrue(clientService.getClients().contains(client2));
         assertFalse(clientService.getClients().contains(client));
     }
@@ -54,6 +57,7 @@ public class TestClientService {
     public void testDeleteClient() {
         clientService.createClient(client);
         assertTrue(clientService.deleteClient(client));
+        assertThat(clientService.getClients().size(), is(0));
         assertFalse(clientService.getClients().contains(client));
     }
 
@@ -61,6 +65,7 @@ public class TestClientService {
     public void testReadOldRepo() {
         clientService.createClient(client);
         ClientService clientService2 = new ClientService(clientService.getClientRepositoryFile());
+        assertThat(clientService.getClients().size(), is(1));
         assertEquals("test", clientService2.getClients().get(0).getName());
     }
 
@@ -68,6 +73,7 @@ public class TestClientService {
     public void testDeleteUnknownClient() {
         clientService.createClient(client);
         assertFalse(clientService.deleteClient(client2));
+        assertThat(clientService.getClients().size(), is(1));
         assertTrue(clientService.getClients().contains(client));
     }
 
