@@ -5,9 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Calendar;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,33 +28,52 @@ public class TestClientService {
     @Before
     public void setUp() {
         clientService = new ClientService(
-                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
+                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest" + Calendar.getInstance().getTimeInMillis() + ".csv"));
     }
 
     @After
     public void tearDown() {
-        clientService.deleteClientRepository(
-                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest.csv"));
+        clientService.deleteClientRepository(clientService.getClientRepositoryFile());
     }
 
     @Test
     public void testCreateClient() {
         assertTrue(clientService.createClient(client));
-        assertTrue(clientService.readClients().contains(client));
+        assertTrue(clientService.getClients().contains(client));
     }
 
     @Test
     public void testUpdateClient() {
         clientService.createClient(client);
         assertTrue(clientService.updateClient(client, client2));
-        assertTrue(clientService.readClients().contains(client2));
-        assertFalse(clientService.readClients().contains(client));
+        assertTrue(clientService.getClients().contains(client2));
+        assertFalse(clientService.getClients().contains(client));
     }
 
     @Test
     public void testDeleteClient() {
         clientService.createClient(client);
         assertTrue(clientService.deleteClient(client));
-        assertFalse(clientService.readClients().contains(client));
+        assertFalse(clientService.getClients().contains(client));
+    }
+
+    @Test
+    public void testReadOldRepo() {
+        clientService.createClient(client);
+        ClientService clientService2 = new ClientService(clientService.getClientRepositoryFile());
+        assertEquals("test", clientService2.getClients().get(0).getName());
+    }
+
+    @Test
+    public void testDeleteUnknownClient() {
+        clientService.createClient(client);
+        assertFalse(clientService.deleteClient(client2));
+        assertTrue(clientService.getClients().contains(client));
+    }
+
+    @Test
+    public void testCreateWrongFile() {
+        ClientService clientService = new ClientService(new File("\\|/"));
+        assertThat(clientService.getClients(), nullValue());
     }
 }

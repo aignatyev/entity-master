@@ -1,7 +1,6 @@
 package edu.entitymaster.logic;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,7 +11,7 @@ import java.util.Map;
  */
 public interface ClientRepository {
     public Boolean createClient(Client client);
-    public List<Client> readClients();
+    public List<Client> getClients();
     public Boolean updateClient(Client srcClient, Client destClient);
     public Boolean deleteClient(Client client);
 }

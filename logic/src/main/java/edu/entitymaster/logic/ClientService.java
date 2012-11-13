@@ -17,24 +17,17 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientService implements ClientRepository {
-    private File file = null;// = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
-    private List<Client> clients = new ArrayList<Client>();
+    private File clientRepositoryFile;// = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
+    private List<Client> clients;
+
+    public File getClientRepositoryFile() {
+        return clientRepositoryFile;
+    }
 
     public ClientService(File f) {
         try {
             Files.touch(f);
-            file = f;
-            clients = readClients();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public ClientService() {
-        try {
-            File f = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
-            Files.touch(f);
-            file = f;
+            clientRepositoryFile = f;
             clients = readClients();
         } catch (IOException e) {
             e.printStackTrace();
@@ -46,7 +39,15 @@ public class ClientService implements ClientRepository {
         return save();
     }
 
-    public List<Client> readClients() {
+    private List<Client> readClients() {
+        clients = new ArrayList<Client>();
+        try {
+            List<String> clientsStrings = Files.readLines(clientRepositoryFile, Charset.defaultCharset());
+            for (String clientString : clientsStrings)
+                clients.add(new Client(clientString));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return clients;
     }
 
@@ -73,7 +74,7 @@ public class ClientService implements ClientRepository {
         try {
             for (Client client : clients)
                 Files.append(client.read(), tmpFile, Charset.defaultCharset());
-            Files.copy(tmpFile, file);
+            Files.copy(tmpFile, clientRepositoryFile);
             tmpFile.delete();
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,5 +85,9 @@ public class ClientService implements ClientRepository {
 
     public void deleteClientRepository(File file) {
         file.delete();
+    }
+
+    public List<Client> getClients() {
+        return clients;
     }
 }
