@@ -1,6 +1,6 @@
 package edu.entitymaster.logic;
 
-import java.util.List;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,8 +10,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public interface ClientRepository {
-    public Boolean createClient(Client client);
-    public List<Client> getClients();
-    public Boolean updateClient(Client srcClient, Client destClient);
-    public Boolean deleteClient(Client client);
+    public void createClient(Client client);
+    public HashMap<Integer, Client> getClients();
+    public void updateClient(Client srcClient, Client destClient);
+    public void deleteClient(Client client);
 }

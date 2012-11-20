@@ -2,12 +2,11 @@ package edu.entitymaster.logic;
 
 import com.google.common.io.Files;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.io.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,77 +16,83 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientService implements ClientRepository {
-    private File clientRepositoryFile;// = new File(System.getProperty("user.dir") + "\\ClientRepository.csv");
-    private List<Client> clients;
+    private HashMap<Integer, Client> clients;
+    private AtomicInteger indexer;
+    private File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
 
-    public File getClientRepositoryFile() {
-        return clientRepositoryFile;
-    }
-
-    public ClientService(File f) {
+    public ClientService() {
         try {
             Files.touch(f);
-            clientRepositoryFile = f;
             clients = readClients();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public Boolean createClient(Client client) {
-        clients.add(client);
-        return save();
-    }
-
-    private List<Client> readClients() {
-        clients = new ArrayList<Client>();
+        //creating clients ID counter
         try {
-            List<String> clientsStrings = Files.readLines(clientRepositoryFile, Charset.defaultCharset());
-            for (String clientString : clientsStrings)
-                clients.add(new Client(clientString));
+            indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
+        } catch (NoSuchElementException e) {
+            indexer = new AtomicInteger(0);
+        }
+    }
+
+    public void createClient(Client client) {
+        client.setId(indexer.getAndIncrement());
+        if (!clients.containsKey(client.getId())) {
+            clients.put(indexer.get(), client);
+            saveToLog(client);
+        }
+        else
+            throw new IllegalArgumentException(client.read() + ": client with such ID already exists");
+    }
+
+    public void updateClient(Client srcClient, Client destClient) {
+        srcClient.setName(destClient.getName()); // set all fields
+        saveToLog(srcClient);
+    }
+
+    public void deleteClient(Client client) {
+        clients.remove(client.getId());
+        client.setDeleted(true);
+        saveToLog(client);
+    }
+
+    private HashMap<Integer, Client> readClients() {
+        clients = new HashMap<Integer, Client>();
+
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] array = line.split(",");
+                int id = Integer.parseInt(array[0]);
+                String name = array[1];
+                Boolean deleted = Boolean.parseBoolean(array[2]);
+                clients.put(id, new Client(id, name, deleted));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return clients;
     }
 
-    public Boolean updateClient(Client srcClient, Client destClient) {
-        clients.set(clients.indexOf(srcClient), destClient);
-        return save();
-    }
+    private void saveToLog(Client client) {
 
-    public Boolean deleteClient(Client client) {
-        if (clients.remove(client)) {
-            return save();
-        }
-        return false;
-    }
-
-    private Boolean save() {
-        File tmpFile = new File(System.getProperty("user.dir") + "\\ClientRepositoryTmp" + Calendar.getInstance().getTimeInMillis() + ".csv");
         try {
-            Files.touch(tmpFile);
-            Files.write("", tmpFile, Charset.defaultCharset());
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(f, true));
+            bufferedWriter.append(client.read());
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+            bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            for (Client client : clients)
-                Files.append(client.read(), tmpFile, Charset.defaultCharset());
-            Files.copy(tmpFile, clientRepositoryFile);
-            tmpFile.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
     }
 
-    public void deleteClientRepository(File file) {
+    public static void deleteClientRepository(File file) {
         file.delete();
     }
 
-    public List<Client> getClients() {
+    public HashMap<Integer, Client> getClients() {
         return clients;
     }
 }

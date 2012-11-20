@@ -1,3 +1,4 @@
+import com.google.common.io.Files;
 import edu.entitymaster.logic.Client;
 import edu.entitymaster.logic.ClientService;
 import org.junit.After;
@@ -5,12 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Calendar;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -28,43 +29,47 @@ public class TestClientService {
 
     @Before
     public void setUp() {
-        clientService = new ClientService(
-                new File(System.getProperty("user.dir") + "\\ClientRepositoryTest" + Calendar.getInstance().getTimeInMillis() + ".csv"));
+        try {
+            Files.write("",
+                    new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv"),
+                    Charset.defaultCharset());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        clientService = new ClientService();
     }
 
     @After
     public void tearDown() {
-        clientService.deleteClientRepository(clientService.getClientRepositoryFile());
     }
 
     @Test
     public void testCreateClient() {
-        assertTrue(clientService.createClient(client));
+        clientService.createClient(client);
         assertThat(clientService.getClients().size(), is(1));
-        assertTrue(clientService.getClients().contains(client));
+        assertTrue(clientService.getClients().containsValue(client));
     }
 
     @Test
     public void testUpdateClient() {
         clientService.createClient(client);
-        assertTrue(clientService.updateClient(client, client2));
+        clientService.updateClient(client, client2);
         assertThat(clientService.getClients().size(), is(1));
-        assertTrue(clientService.getClients().contains(client2));
-        assertFalse(clientService.getClients().contains(client));
+        assertEquals("2test2", clientService.getClients().get(0).getName());
     }
 
     @Test
     public void testDeleteClient() {
         clientService.createClient(client);
-        assertTrue(clientService.deleteClient(client));
+        clientService.deleteClient(client);
         assertThat(clientService.getClients().size(), is(0));
-        assertFalse(clientService.getClients().contains(client));
+        assertFalse(clientService.getClients().containsValue(client));
     }
 
     @Test
     public void testReadOldRepo() {
         clientService.createClient(client);
-        ClientService clientService2 = new ClientService(clientService.getClientRepositoryFile());
+        ClientService clientService2 = new ClientService();
         assertThat(clientService.getClients().size(), is(1));
         assertEquals("test", clientService2.getClients().get(0).getName());
     }
@@ -72,14 +77,9 @@ public class TestClientService {
     @Test
     public void testDeleteUnknownClient() {
         clientService.createClient(client);
-        assertFalse(clientService.deleteClient(client2));
+        clientService.deleteClient(client2);
         assertThat(clientService.getClients().size(), is(1));
-        assertTrue(clientService.getClients().contains(client));
+        assertTrue(clientService.getClients().containsValue(client));
     }
 
-    @Test
-    public void testCreateWrongFile() {
-        ClientService clientService = new ClientService(new File("\\|/"));
-        assertThat(clientService.getClients(), nullValue());
-    }
 }

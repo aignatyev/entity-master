@@ -9,9 +9,33 @@ package edu.entitymaster.logic;
  */
 public class Client {
     String name;
+    boolean deleted;
+    int id;
 
-    public Client(String name) {
+    public Client(String name){
         this.name = name;
+    }
+
+    public Client(int id, String name, Boolean deleted) {
+        this.id = id;
+        this.name = name;
+        this.deleted = deleted;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public String getName() {
@@ -23,6 +47,6 @@ public class Client {
     }
 
     public String read() {
-        return name;       //+ number + etc
+        return id + "," + name + "," + deleted;       //+ number + etc
     }
 }
