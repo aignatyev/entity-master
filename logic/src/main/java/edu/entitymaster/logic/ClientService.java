@@ -36,9 +36,9 @@ public class ClientService implements ClientRepository {
     }
 
     public void createClient(Client client) {
-        client.setId(indexer.getAndIncrement());
+        client.setId(indexer.get());
         if (!clients.containsKey(client.getId())) {
-            clients.put(indexer.get(), client);
+            clients.put(indexer.getAndIncrement(), client);
             saveToLog(client);
         }
         else

@@ -24,8 +24,8 @@ import static org.junit.Assert.assertThat;
  */
 public class TestClientService {
     ClientService clientService;
-    Client client = new Client("test");
-    Client client2 = new Client("2test2");
+    Client client = new Client(0, "test", false);
+    Client client2 = new Client(1, "2test2", false);
 
     @Before
     public void setUp() {

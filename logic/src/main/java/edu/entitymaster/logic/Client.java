@@ -12,9 +12,9 @@ public class Client {
     boolean deleted;
     int id;
 
-    public Client(String name){
+    /*public Client(String name){
         this.name = name;
-    }
+    }*/
 
     public Client(int id, String name, Boolean deleted) {
         this.id = id;
