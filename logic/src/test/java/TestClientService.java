@@ -1,3 +1,4 @@
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import edu.entitymaster.logic.Client;
 import edu.entitymaster.logic.ClientService;
@@ -29,7 +30,7 @@ public class TestClientService {
 
     @Before
     public void setUp() {
-        try {
+        try {                                                           //TODO make test repository instead of main one
             Files.write("",
                     new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv"),
                     Charset.defaultCharset());
@@ -70,7 +71,7 @@ public class TestClientService {
     public void testReadOldRepo() {
         clientService.createClient(client);
         ClientService clientService2 = new ClientService();
-        assertThat(clientService.getClients().size(), is(1));
+        assertThat(clientService2.getClients().size(), is(1));
         assertEquals("test", clientService2.getClients().get(0).getName());
     }
 
@@ -80,6 +81,36 @@ public class TestClientService {
         clientService.deleteClient(client2);
         assertThat(clientService.getClients().size(), is(1));
         assertTrue(clientService.getClients().containsValue(client));
+    }
+
+    @Test
+    public void testConcurrentCreate() {
+        class TestConcurrentCreate implements Runnable {
+            public void run() {
+                clientService.createClient(client);
+            }
+        }
+
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+        new TestConcurrentCreate().run();
+
+        assertThat(clientService.getClients().size(), is(15));
+        assertTrue(clientService.getClients().containsValue(client));
+        assertEquals(clientService.getClients().keySet(),
+                Sets.newHashSet(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
     }
 
 }

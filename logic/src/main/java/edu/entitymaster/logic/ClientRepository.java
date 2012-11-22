@@ -1,6 +1,6 @@
 package edu.entitymaster.logic;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public interface ClientRepository {
     public void createClient(Client client);
-    public HashMap<Integer, Client> getClients();
+    public ConcurrentHashMap<Integer, Client> getClients();
     public void updateClient(Client srcClient, Client destClient);
     public void deleteClient(Client client);
 }

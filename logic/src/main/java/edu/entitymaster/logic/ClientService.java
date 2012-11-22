@@ -1,11 +1,9 @@
 package edu.entitymaster.logic;
 
-import com.google.common.io.Files;
-
 import java.io.*;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -16,17 +14,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientService implements ClientRepository {
-    private HashMap<Integer, Client> clients;
+    private ConcurrentHashMap<Integer, Client> clients;
     private AtomicInteger indexer;
     private File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
+    private BufferedWriter bufferedWriter;
 
     public ClientService() {
-        try {
-            Files.touch(f);
-            clients = readClients();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        clients = readClients();
         //creating clients ID counter
         try {
             indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
@@ -36,12 +30,11 @@ public class ClientService implements ClientRepository {
     }
 
     public void createClient(Client client) {
-        client.setId(indexer.get());
+        client.setId(indexer.getAndIncrement());
         if (!clients.containsKey(client.getId())) {
-            clients.put(indexer.getAndIncrement(), client);
+            clients.put(client.getId(), client);
             saveToLog(client);
-        }
-        else
+        } else
             throw new IllegalArgumentException(client.read() + ": client with such ID already exists");
     }
 
@@ -56,9 +49,8 @@ public class ClientService implements ClientRepository {
         saveToLog(client);
     }
 
-    private HashMap<Integer, Client> readClients() {
-        clients = new HashMap<Integer, Client>();
-
+    private ConcurrentHashMap<Integer, Client> readClients() {
+        clients = new ConcurrentHashMap<Integer, Client>();
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
             String line;
@@ -67,7 +59,13 @@ public class ClientService implements ClientRepository {
                 int id = Integer.parseInt(array[0]);
                 String name = array[1];
                 Boolean deleted = Boolean.parseBoolean(array[2]);
-                clients.put(id, new Client(id, name, deleted));
+                Client client = new Client(id, name, deleted);
+                if (deleted)
+                    deleteClient(client);
+                else if (clients.containsKey(id))
+                    updateClient(clients.get(id), client);
+                else
+                    clients.put(id, client);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,24 +73,30 @@ public class ClientService implements ClientRepository {
         return clients;
     }
 
-    private void saveToLog(Client client) {
-
+    private synchronized void saveToLog(final Client client) {
+        class FlushToLog implements Runnable {
+            public void run() {
+                try {
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(f, true));
+//            if (bufferedWriter.)
+            bufferedWriter = new BufferedWriter(new FileWriter(f, true));
             bufferedWriter.append(client.read());
             bufferedWriter.newLine();
-            bufferedWriter.flush();
-            bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+         //TODO flush every 5 lines
+            new FlushToLog().run();
     }
 
-    public static void deleteClientRepository(File file) {
-        file.delete();
-    }
-
-    public HashMap<Integer, Client> getClients() {
+    public ConcurrentHashMap<Integer, Client> getClients() {
         return clients;
     }
 }
