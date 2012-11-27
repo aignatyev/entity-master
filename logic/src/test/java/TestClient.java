@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
  * To change this template use File | Settings | File Templates.
  */
 public class TestClient {
-    Client client = new Client(0, "test", false);
+    Client client = new Client("test");
 
     @Test
     public void testClientName(){

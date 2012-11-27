@@ -1,8 +1,10 @@
 package edu.entitymaster.logic;
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.util.Collections;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,89 +16,87 @@ import java.util.concurrent.atomic.AtomicInteger;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientService implements ClientRepository {
-    private ConcurrentHashMap<Integer, Client> clients;
-    private AtomicInteger indexer;
+    private Map<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
+    private AtomicInteger indexer = new AtomicInteger(0);
     private File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
     private BufferedWriter bufferedWriter;
 
     public ClientService() {
-        clients = readClients();
-        //creating clients ID counter
         try {
-            indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
-        } catch (NoSuchElementException e) {
-            indexer = new AtomicInteger(0);
+            bufferedWriter = new BufferedWriter(new FileWriter(f, true));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     public void createClient(Client client) {
-        client.setId(indexer.getAndIncrement());
-        if (!clients.containsKey(client.getId())) {
-            clients.put(client.getId(), client);
+        synchronized (indexer) {
+            client.setId(indexer.get());
+            clients.put(indexer.getAndIncrement(), client);
             saveToLog(client);
-        } else
-            throw new IllegalArgumentException(client.read() + ": client with such ID already exists");
+        }
     }
 
     public void updateClient(Client srcClient, Client destClient) {
-        srcClient.setName(destClient.getName()); // set all fields
-        saveToLog(srcClient);
+        synchronized (srcClient){
+            int id = srcClient.getId();
+            srcClient = destClient;
+            srcClient.setId(id);
+            clients.put(srcClient.getId(), srcClient);
+            saveToLog(srcClient);
+        }
     }
 
     public void deleteClient(Client client) {
-        clients.remove(client.getId());
-        client.setDeleted(true);
-        saveToLog(client);
+        synchronized (client) {
+            clients.remove(client.getId());
+            saveToLog(client);           //TODO mark client as deleted
+        }
     }
 
-    private ConcurrentHashMap<Integer, Client> readClients() {
+    public Map<Integer, Client> readClients() {
         clients = new ConcurrentHashMap<Integer, Client>();
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+            Gson gson = new Gson();
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String[] array = line.split(",");
-                int id = Integer.parseInt(array[0]);
-                String name = array[1];
-                Boolean deleted = Boolean.parseBoolean(array[2]);
-                Client client = new Client(id, name, deleted);
-                if (deleted)
-                    deleteClient(client);
-                else if (clients.containsKey(id))
-                    updateClient(clients.get(id), client);
-                else
-                    clients.put(id, client);
+                Client client = gson.fromJson(line, Client.class);
+                clients.put(client.getId(), client);
             }
+            //creating clients ID counter
+            indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         return clients;
     }
 
-    private synchronized void saveToLog(final Client client) {
+    private void saveToLog(final Client client) {
         class FlushToLog implements Runnable {
             public void run() {
                 try {
                     bufferedWriter.flush();
-                    bufferedWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-        try {
-//            if (bufferedWriter.)
-            bufferedWriter = new BufferedWriter(new FileWriter(f, true));
-            bufferedWriter.append(client.read());
-            bufferedWriter.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (client) {
+            try {
+                bufferedWriter.append(client.toString());
+                bufferedWriter.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //TODO flush every 5 lines
+            Thread thread = new Thread(new FlushToLog());
+            thread.start();
         }
-         //TODO flush every 5 lines
-            new FlushToLog().run();
     }
 
-    public ConcurrentHashMap<Integer, Client> getClients() {
+    public Map<Integer, Client> getClients() {
         return clients;
     }
 }

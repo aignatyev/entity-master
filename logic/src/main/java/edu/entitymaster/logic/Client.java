@@ -1,5 +1,7 @@
 package edu.entitymaster.logic;
 
+import com.google.gson.Gson;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Антон
@@ -9,18 +11,7 @@ package edu.entitymaster.logic;
  */
 public class Client {
     String name;
-    boolean deleted;
     int id;
-
-    /*public Client(String name){
-        this.name = name;
-    }*/
-
-    public Client(int id, String name, Boolean deleted) {
-        this.id = id;
-        this.name = name;
-        this.deleted = deleted;
-    }
 
     public int getId() {
         return id;
@@ -30,12 +21,8 @@ public class Client {
         this.id = id;
     }
 
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
+    public Client(String name) {
+        this.name = name;
     }
 
     public String getName() {
@@ -46,7 +33,8 @@ public class Client {
         this.name = name;
     }
 
-    public String read() {
-        return id + "," + name + "," + deleted;       //+ number + etc
+    public String toString() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
     }
 }
