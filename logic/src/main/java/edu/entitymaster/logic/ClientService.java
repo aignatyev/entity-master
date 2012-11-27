@@ -2,7 +2,10 @@ package edu.entitymaster.logic;
 
 import com.google.gson.Gson;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,15 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClientService implements ClientRepository {
     private Map<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
     private AtomicInteger indexer = new AtomicInteger(0);
-    private File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
-    private BufferedWriter bufferedWriter;
+    private Writer writer;
 
-    public ClientService() {
-        try {
-            bufferedWriter = new BufferedWriter(new FileWriter(f, true));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ClientService(Writer writer) {
+        this.writer = writer;
     }
 
     public void createClient(Client client) {
@@ -54,10 +52,9 @@ public class ClientService implements ClientRepository {
         }
     }
 
-    public Map<Integer, Client> readClients() {
-        clients = new ConcurrentHashMap<Integer, Client>();
+    public Map<Integer, Client> readClients(Reader reader) {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+            BufferedReader bufferedReader = new BufferedReader(reader);
             Gson gson = new Gson();
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -77,7 +74,7 @@ public class ClientService implements ClientRepository {
         class FlushToLog implements Runnable {
             public void run() {
                 try {
-                    bufferedWriter.flush();
+                    writer.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -85,8 +82,8 @@ public class ClientService implements ClientRepository {
         }
         synchronized (client) {
             try {
-                bufferedWriter.append(client.toString());
-                bufferedWriter.newLine();
+                writer.append(client.toString());
+                writer.append('\n');
             } catch (IOException e) {
                 e.printStackTrace();
             }

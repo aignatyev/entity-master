@@ -7,8 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,18 +30,26 @@ public class TestClientService {
     ClientService clientService;
     Client client = new Client("test");
     Client client2 = new Client("2test2");
-    private File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
+    File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
+    BufferedWriter bufferedWriter;
+    {
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(f));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Before
     public void setUp() {
-        try {                                                           //TODO make test repository instead of main one
+        try {
             Files.write("",
                     f,
                     Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService();
+        clientService = new ClientService(bufferedWriter);
     }
 
     @After
@@ -81,8 +88,12 @@ public class TestClientService {
     @Test
     public void testReadOldRepo() {
         clientService.createClient(client);
-        ClientService clientService2 = new ClientService();
-        clientService2.readClients();
+        ClientService clientService2 = new ClientService(bufferedWriter);
+        try {
+            clientService2.readClients(new FileReader(f));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         assertThat(clientService2.getClients().size(), is(1));
         assertEquals("test", clientService2.getClients().get(0).getName());
     }
