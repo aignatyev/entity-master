@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,19 +19,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ClientService implements ClientRepository {
     private Map<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
-    private AtomicInteger indexer = new AtomicInteger(0);
-    private Writer writer;
+    private AtomicInteger indexer = new AtomicInteger(1);
+    private TrLogger trLogger;
 
-    public ClientService(Writer writer) {
-        this.writer = writer;
+    public ClientService(TrLogger trLogger) {
+        this.trLogger = trLogger;
     }
 
     public void createClient(Client client) {
         synchronized (indexer) {
             client.setId(indexer.get());
             clients.put(indexer.getAndIncrement(), client);
-            saveToLog(client);
         }
+        trLogger.save(client);
     }
 
     public void updateClient(Client srcClient, Client destClient) {
@@ -41,15 +40,15 @@ public class ClientService implements ClientRepository {
             srcClient = destClient;
             srcClient.setId(id);
             clients.put(srcClient.getId(), srcClient);
-            saveToLog(srcClient);
         }
+        trLogger.save(srcClient);
     }
 
     public void deleteClient(Client client) {
         synchronized (client) {
             clients.remove(client.getId());
-            saveToLog(client);           //TODO mark client as deleted
         }
+        trLogger.markAsDeleted(client);
     }
 
     public Map<Integer, Client> readClients(Reader reader) {
@@ -59,38 +58,17 @@ public class ClientService implements ClientRepository {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 Client client = gson.fromJson(line, Client.class);
-                clients.put(client.getId(), client);
+                if (client.getId() > 0)
+                    clients.put(client.getId(), client);
+                else clients.remove(-client.getId());
             }
             //creating clients ID counter
-            indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
-
+            if (!clients.isEmpty())
+                indexer = new AtomicInteger(Collections.max(clients.keySet()) + 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return clients;
-    }
-
-    private void saveToLog(final Client client) {
-        class FlushToLog implements Runnable {
-            public void run() {
-                try {
-                    writer.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        synchronized (client) {
-            try {
-                writer.append(client.toString());
-                writer.append('\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //TODO flush every 5 lines
-            Thread thread = new Thread(new FlushToLog());
-            thread.start();
-        }
     }
 
     public Map<Integer, Client> getClients() {

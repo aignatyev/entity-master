@@ -3,6 +3,7 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import edu.entitymaster.logic.Client;
 import edu.entitymaster.logic.ClientService;
+import edu.entitymaster.logic.TrLogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class TestClientService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService(bufferedWriter);
+        clientService = new ClientService(new TrLogger(bufferedWriter));
     }
 
     @After
@@ -74,7 +75,7 @@ public class TestClientService {
         clientService.createClient(client);
         clientService.updateClient(client, client2);
         assertThat(clientService.getClients().size(), is(1));
-        assertEquals("2test2", clientService.getClients().get(0).getName());
+        assertEquals("2test2", clientService.getClients().get(1).getName());
     }
 
     @Test
@@ -86,16 +87,17 @@ public class TestClientService {
     }
 
     @Test
-    public void testReadOldRepo() {
+    public void testReadOldRepo() throws InterruptedException {
         clientService.createClient(client);
-        ClientService clientService2 = new ClientService(bufferedWriter);
+        Thread.sleep(1000);      // wait until client is flushed
+        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter));
         try {
             clientService2.readClients(new FileReader(f));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         assertThat(clientService2.getClients().size(), is(1));
-        assertEquals("test", clientService2.getClients().get(0).getName());
+        assertEquals("test", clientService2.getClients().get(1).getName());
     }
 
     @Test
@@ -116,8 +118,8 @@ public class TestClientService {
         }
         assertThat(clientService.getClients().size(), is(15));
         assertTrue(clientService.getClients().containsValue(client));
-        assertEquals(clientService.getClients().keySet(),
-                Sets.newHashSet(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
+        assertEquals(Sets.newHashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+                clientService.getClients().keySet());
     }
 
 }
