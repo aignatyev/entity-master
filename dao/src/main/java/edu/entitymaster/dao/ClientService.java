@@ -1,4 +1,4 @@
-package edu.entitymaster.logic;
+package edu.entitymaster.dao;
 
 import com.google.gson.Gson;
 

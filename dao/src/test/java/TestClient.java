@@ -1,8 +1,7 @@
-import edu.entitymaster.logic.Client;
+import edu.entitymaster.dao.Client;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +16,6 @@ public class TestClient {
     @Test
     public void testClientName(){
         client.setName("test");
-        assertThat(client.getName(), is("test"));
+        Assert.assertThat(client.getName(), CoreMatchers.is("test"));
     }
 }

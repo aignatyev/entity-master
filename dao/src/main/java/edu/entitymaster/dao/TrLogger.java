@@ -1,4 +1,4 @@
-package edu.entitymaster.logic;
+package edu.entitymaster.dao;
 
 import java.io.IOException;
 import java.io.Writer;
