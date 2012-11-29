@@ -71,7 +71,7 @@ public class ClientService implements ClientRepository {
         return clients;
     }
 
-    public Map<Integer, Client> getClients() {
+    public Map<Integer, Client> getClientsMap() {
         return clients;
     }
 }

@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,11 +38,11 @@ public class TestClientSearch {
 
     @Test
     public void testSearchClient() {
-        assertEquals(client, clientSearch.findClientByName("test"));
+        assertEquals(client, clientSearch.findClientByName("test").toArray()[0]);
     }
 
     @Test
     public void testSearchNonExistingClient() {
-        assertEquals(null, clientSearch.findClientByName("te2st"));
+        assertTrue(clientSearch.findClientByName("te2st").isEmpty());
     }
 }

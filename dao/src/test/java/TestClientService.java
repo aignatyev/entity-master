@@ -57,8 +57,8 @@ public class TestClientService {
     public void testCreateClient() {
         Gson gson = new Gson();
         clientService.createClient(client);
-        Assert.assertThat(clientService.getClients().size(), CoreMatchers.is(1));
-        Assert.assertTrue(clientService.getClients().containsValue(client));
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(1));
+        Assert.assertTrue(clientService.getClientsMap().containsValue(client));
         try {
             Assert.assertTrue(Files.readLines(f, Charset.defaultCharset()).contains(gson.toJson(client)));
         } catch (IOException e) {
@@ -70,16 +70,16 @@ public class TestClientService {
     public void testUpdateClient() {
         clientService.createClient(client);
         clientService.updateClient(client, client2);
-        Assert.assertThat(clientService.getClients().size(), CoreMatchers.is(1));
-        Assert.assertEquals("2test2", clientService.getClients().get(1).getName());
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(1));
+        Assert.assertEquals("2test2", clientService.getClientsMap().get(1).getName());
     }
 
     @Test
     public void testDeleteClient() {
         clientService.createClient(client);
         clientService.deleteClient(client);
-        Assert.assertThat(clientService.getClients().size(), CoreMatchers.is(0));
-        Assert.assertFalse(clientService.getClients().containsValue(client));
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(0));
+        Assert.assertFalse(clientService.getClientsMap().containsValue(client));
     }
 
     @Test
@@ -92,8 +92,8 @@ public class TestClientService {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        Assert.assertThat(clientService2.getClients().size(), CoreMatchers.is(1));
-        Assert.assertEquals("test", clientService2.getClients().get(1).getName());
+        Assert.assertThat(clientService2.getClientsMap().size(), CoreMatchers.is(1));
+        Assert.assertEquals("test", clientService2.getClientsMap().get(1).getName());
     }
 
     @Test
@@ -112,10 +112,10 @@ public class TestClientService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assert.assertThat(clientService.getClients().size(), CoreMatchers.is(15));
-        Assert.assertTrue(clientService.getClients().containsValue(client));
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(15));
+        Assert.assertTrue(clientService.getClientsMap().containsValue(client));
         Assert.assertEquals(Sets.newHashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-                clientService.getClients().keySet());
+                clientService.getClientsMap().keySet());
     }
 
 }

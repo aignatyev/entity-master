@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public interface ClientRepository {
     public void createClient(Client client);
-    public Map<Integer, Client> getClients();
+    public Map<Integer, Client> getClientsMap();
     public void updateClient(Client srcClient, Client destClient);
     public void deleteClient(Client client);
 }

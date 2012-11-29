@@ -1,7 +1,13 @@
 package edu.entitymaster.logic;
 
+import com.google.common.base.Predicate;
 import edu.entitymaster.dao.Client;
 import edu.entitymaster.dao.ClientRepository;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+import static com.google.common.collect.Collections2.filter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,11 +23,12 @@ public class ClientSearch {
         this.clientRepository = clientRepository;
     }
 
-    public Client findClientByName(String name) {
-        for (Client client : clientRepository.getClients().values()) {
-            if (client.getName().matches(name))
-                return client;
-        }
-        return null;
+    public Collection findClientByName(final String name) {
+        return filter(clientRepository.getClientsMap().values(),
+                new Predicate<Client>() {
+                    public boolean apply(@Nullable Client input) {
+                        return input.getName().matches(name);
+                    }
+                });
     }
 }
