@@ -1,0 +1,13 @@
++ ConcurrentHashMap -> Map
++ BufferedWriter -> Writer
++ TrLog
++ move readClients out from constructor
++ synchronize createClient
++ start thread for TrLogging
+- journal switching
++ Repository, interface -> dao
++ Gson serialization
++ make thread pool with ExecutorService in test
+- ByteArrayOutputStream
++- search by substring (guava filter, Predicate)
+- measure 1 mln transactions performance
