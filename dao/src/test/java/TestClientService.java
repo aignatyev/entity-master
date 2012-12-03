@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -103,8 +104,9 @@ public class TestClientService {
                 clientService.createClient(client);
             }
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(15);
-        for (int i = 0; i<15; i++) {
+        int threadsNum = 15;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadsNum);
+        for (int i = 0; i<threadsNum; i++) {
             executorService.execute(new TestConcurrentCreate());
         }
         try {
@@ -112,10 +114,43 @@ public class TestClientService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(15));
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(threadsNum));
         Assert.assertTrue(clientService.getClientsMap().containsValue(client));
         Assert.assertEquals(Sets.newHashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
                 clientService.getClientsMap().keySet());
+    }
+
+    @Test
+    public void testPerformance() {
+        class TestConcurrentCreate implements Runnable {
+            public void run() {
+                for (int i=0; i<1000 ; i++) {
+                    clientService.createClient(client);
+                }
+            }
+        }
+        int threadsNum = 1000;
+        long start = Calendar.getInstance().getTimeInMillis();
+        ExecutorService executorService = Executors.newFixedThreadPool(threadsNum);
+        for (int i = 0; i<threadsNum; i++) {
+            executorService.execute(new TestConcurrentCreate());
+        }
+        try {  //TODO why is it always false?
+            System.out.println("writing done: " + executorService.awaitTermination(6, TimeUnit.MINUTES));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to write");
+        ClientService clientService2;
+        try {
+            clientService2 = new ClientService(new TrLogger(new FileWriter(f, true)));
+            start = Calendar.getInstance().getTimeInMillis();
+            clientService2.readClients(new FileReader(f));
+            System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to read");
+
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
 }

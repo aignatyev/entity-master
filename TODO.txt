@@ -10,4 +10,4 @@
 + make thread pool with ExecutorService in test
 - ByteArrayOutputStream
 + search by substring (guava filter, Predicate)
-- measure 1 mln transactions performance
++ measure 1 mln transactions performance

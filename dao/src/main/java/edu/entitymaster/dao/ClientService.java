@@ -30,8 +30,8 @@ public class ClientService implements ClientRepository {
         synchronized (indexer) {
             client.setId(indexer.get());
             clients.put(indexer.getAndIncrement(), client);
+            trLogger.save(client);
         }
-        trLogger.save(client);
     }
 
     public void updateClient(Client srcClient, Client destClient) {
@@ -40,15 +40,15 @@ public class ClientService implements ClientRepository {
             srcClient = destClient;
             srcClient.setId(id);
             clients.put(srcClient.getId(), srcClient);
+            trLogger.save(srcClient);
         }
-        trLogger.save(srcClient);
     }
 
     public void deleteClient(Client client) {
         synchronized (client) {
             clients.remove(client.getId());
+            trLogger.markAsDeleted(client);
         }
-        trLogger.markAsDeleted(client);
     }
 
     public Map<Integer, Client> readClients(Reader reader) {
