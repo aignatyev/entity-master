@@ -12,10 +12,10 @@ import org.junit.Test;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -124,21 +124,26 @@ public class TestClientService {
     public void testPerformance() {
         class TestConcurrentCreate implements Runnable {
             public void run() {
-                for (int i=0; i<1000 ; i++) {
+                for (int i=0; i<100000 ; i++) {
                     clientService.createClient(client);
                 }
             }
         }
-        int threadsNum = 1000;
-        long start = Calendar.getInstance().getTimeInMillis();
+        int threadsNum = 10;
+        List<Future> futures = new ArrayList<Future>();
         ExecutorService executorService = Executors.newFixedThreadPool(threadsNum);
+        long start = Calendar.getInstance().getTimeInMillis();
         for (int i = 0; i<threadsNum; i++) {
-            executorService.execute(new TestConcurrentCreate());
+            futures.add(executorService.submit(new TestConcurrentCreate()));
         }
-        try {  //TODO why is it always false?
-            System.out.println("writing done: " + executorService.awaitTermination(6, TimeUnit.MINUTES));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (Future f : futures) {
+            try {
+                f.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (ExecutionException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
         System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to write");
         ClientService clientService2;
