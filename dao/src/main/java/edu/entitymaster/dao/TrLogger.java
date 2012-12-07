@@ -21,22 +21,17 @@ public class TrLogger {
     }
 
     public void save(Client client) {
-        synchronized (writer) {
-            try {
-                writer.append(client.toString());
-                writer.append('\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            executorService.execute(new FlushToLog());
+        try {
+            writer.append(client.toString() + '\n');
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        executorService.execute(new FlushToLog());
     }
 
     public void markAsDeleted(Client client) {
-        synchronized (writer) {
-            client.setId(-client.getId());      //setting negative id to mark as deleted
-            save(client);
-        }
+        client.setId(-client.getId());      //setting negative id to mark as deleted
+        save(client);
     }
 
     class FlushToLog implements Runnable {

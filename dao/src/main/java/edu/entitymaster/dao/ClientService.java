@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -21,9 +22,36 @@ public class ClientService implements ClientRepository {
     private Map<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
     private AtomicInteger indexer = new AtomicInteger(1);
     private TrLogger trLogger;
+    private CountDownLatch initLock;
 
     public ClientService(TrLogger trLogger) {
         this.trLogger = trLogger;
+        initLock = new CountDownLatch(0);
+    }
+
+
+    public ClientService(TrLogger trLogger, Reader initialLoad) {
+        this.trLogger = trLogger;
+        initLock = new CountDownLatch(1);
+        readClients(initialLoad);
+        initLock.countDown();
+    }
+
+
+    public void saveClient(Client cl) {
+        awaitForInit();
+        if(cl.getId() == 0) {
+            cl.setId(indexer.incrementAndGet());
+        }
+        clients.put(cl.getId(), cl);
+    }
+
+    private void awaitForInit() {
+        try {
+            initLock.await();
+        } catch (InterruptedException e) {
+            new RuntimeException("init exception");
+        }
     }
 
     public void createClient(Client client) {
@@ -35,6 +63,7 @@ public class ClientService implements ClientRepository {
     }
 
     public void updateClient(Client srcClient, Client destClient) {
+        awaitForInit();
         synchronized (srcClient){
             int id = srcClient.getId();
             srcClient = destClient;
@@ -51,7 +80,7 @@ public class ClientService implements ClientRepository {
         }
     }
 
-    public Map<Integer, Client> readClients(Reader reader) {
+    private Map<Integer, Client> readClients(Reader reader) {
         try {
             BufferedReader bufferedReader = new BufferedReader(reader);
             Gson gson = new Gson();

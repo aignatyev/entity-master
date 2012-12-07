@@ -1,3 +1,4 @@
+import com.google.common.io.Resources;
 import edu.entitymaster.dao.Client;
 import edu.entitymaster.dao.ClientService;
 import edu.entitymaster.dao.TrLogger;
@@ -20,9 +21,11 @@ import static org.junit.Assert.assertTrue;
  * To change this template use File | Settings | File Templates.
  */
 public class TestClientSearch {
+    public static final String CLIENT_REPOSITORY_LOG_CSV = "ClientRepositoryLog.csv";
     ClientService clientService;
     Client client = new Client("test");
-    File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
+
+    File f = new File( "./" + CLIENT_REPOSITORY_LOG_CSV);
     BufferedWriter bufferedWriter;
     ClientSearch clientSearch;
     {
