@@ -84,15 +84,10 @@ public class TestClientService {
     }
 
     @Test
-    public void testReadOldRepo() throws InterruptedException {
+    public void testReadOldRepo() throws InterruptedException, FileNotFoundException {
         clientService.createClient(client);
         Thread.sleep(5000);      // wait 5 sec for client is flushed
-        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter));
-        try {
-            clientService2.readClients(new FileReader(f));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter), new FileReader(f));
         Assert.assertThat(clientService2.getClientsMap().size(), CoreMatchers.is(1));
         Assert.assertEquals("test", clientService2.getClientsMap().get(1).getName());
     }
@@ -148,9 +143,8 @@ public class TestClientService {
         System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to write");
         ClientService clientService2;
         try {
-            clientService2 = new ClientService(new TrLogger(new FileWriter(f, true)));
             start = Calendar.getInstance().getTimeInMillis();
-            clientService2.readClients(new FileReader(f));
+            clientService2 = new ClientService(new TrLogger(new FileWriter(f, true)), new FileReader(f));
             System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to read");
 
         } catch (IOException e) {

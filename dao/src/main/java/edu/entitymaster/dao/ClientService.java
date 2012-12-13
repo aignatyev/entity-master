@@ -29,7 +29,6 @@ public class ClientService implements ClientRepository {
         initLock = new CountDownLatch(0);
     }
 
-
     public ClientService(TrLogger trLogger, Reader initialLoad) {
         this.trLogger = trLogger;
         initLock = new CountDownLatch(1);
@@ -50,7 +49,7 @@ public class ClientService implements ClientRepository {
         try {
             initLock.await();
         } catch (InterruptedException e) {
-            new RuntimeException("init exception");
+            throw new RuntimeException("init exception");
         }
     }
 
@@ -101,6 +100,6 @@ public class ClientService implements ClientRepository {
     }
 
     public Map<Integer, Client> getClientsMap() {
-        return clients;
+        return Collections.unmodifiableMap(clients);
     }
 }
