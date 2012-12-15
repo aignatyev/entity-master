@@ -30,8 +30,8 @@ public class TrLogger {
     }
 
     public void markAsDeleted(Client client) {
-        client.setId(-client.getId());      //setting negative id to mark as deleted
-        save(client);
+        //setting negative id to mark as deleted
+        save(client.setId(-client.getId()));
     }
 
     class FlushToLog implements Runnable {

@@ -17,8 +17,9 @@ public class Client {
         return id;
     }
 
-    public void setId(int id) {
+    public Client setId(int id) {
         this.id = id;
+        return this;
     }
 
     public Client(String name) {
@@ -29,8 +30,9 @@ public class Client {
         return name;
     }
 
-    public void setName(String name) {
+    public Client setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String toString() {

@@ -27,8 +27,7 @@ import java.util.concurrent.*;
 public class TestClientService {
     ClientService clientService;
     Client client = new Client("test");
-    Client client2 = new Client("2test2");
-    File f = new File(System.getProperty("user.dir") + "\\ClientRepositoryLog.csv");
+    File f = new File("./ClientRepositoryLog.csv");
     BufferedWriter bufferedWriter;
     {
         try {
@@ -57,7 +56,7 @@ public class TestClientService {
     @Test
     public void testCreateClient() {
         Gson gson = new Gson();
-        clientService.createClient(client);
+        clientService.saveClient(client);
         Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(1));
         Assert.assertTrue(clientService.getClientsMap().containsValue(client));
         try {
@@ -69,34 +68,34 @@ public class TestClientService {
 
     @Test
     public void testUpdateClient() {
-        clientService.createClient(client);
-        clientService.updateClient(client, client2);
+        int id = clientService.saveClient(client);
+        clientService.saveClient(client.setName("2test2"));
         Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(1));
-        Assert.assertEquals("2test2", clientService.getClientsMap().get(1).getName());
+        Assert.assertEquals("2test2", clientService.getClientsMap().get(id).getName());
     }
 
     @Test
     public void testDeleteClient() {
-        clientService.createClient(client);
-        clientService.deleteClient(client);
+        int id = clientService.saveClient(client);
+        clientService.deleteClient(id);
         Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(0));
         Assert.assertFalse(clientService.getClientsMap().containsValue(client));
     }
 
     @Test
     public void testReadOldRepo() throws InterruptedException, FileNotFoundException {
-        clientService.createClient(client);
-        Thread.sleep(5000);      // wait 5 sec for client is flushed
+        int id = clientService.saveClient(client);
+        Thread.sleep(3000); //wait for client to flush
         ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter), new FileReader(f));
         Assert.assertThat(clientService2.getClientsMap().size(), CoreMatchers.is(1));
-        Assert.assertEquals("test", clientService2.getClientsMap().get(1).getName());
+        Assert.assertEquals("test", clientService2.getClientsMap().get(id).getName());
     }
 
     @Test
-    public void testConcurrentCreate() {
+    public void testConcurrentUpdate() {
         class TestConcurrentCreate implements Runnable {
             public void run() {
-                clientService.createClient(client);
+                clientService.saveClient(client);
             }
         }
         int threadsNum = 15;
@@ -109,9 +108,9 @@ public class TestClientService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(threadsNum));
+        Assert.assertThat(clientService.getClientsMap().size(), CoreMatchers.is(1));
         Assert.assertTrue(clientService.getClientsMap().containsValue(client));
-        Assert.assertEquals(Sets.newHashSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+        Assert.assertEquals(Sets.newHashSet(1),
                 clientService.getClientsMap().keySet());
     }
 
@@ -120,7 +119,7 @@ public class TestClientService {
         class TestConcurrentCreate implements Runnable {
             public void run() {
                 for (int i=0; i<100000 ; i++) {
-                    clientService.createClient(client);
+                    clientService.saveClient(client);
                 }
             }
         }

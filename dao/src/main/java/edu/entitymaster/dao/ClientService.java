@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,6 +24,7 @@ public class ClientService implements ClientRepository {
     private AtomicInteger indexer = new AtomicInteger(1);
     private TrLogger trLogger;
     private CountDownLatch initLock;
+    private Lock saveLock;
 
     public ClientService(TrLogger trLogger) {
         this.trLogger = trLogger;
@@ -36,13 +38,14 @@ public class ClientService implements ClientRepository {
         initLock.countDown();
     }
 
-
-    public void saveClient(Client cl) {
+    public int saveClient(Client client) {
         awaitForInit();
-        if(cl.getId() == 0) {
-            cl.setId(indexer.incrementAndGet());
+        synchronized (client) {
+            if(client.getId() == 0) client.setId(indexer.getAndIncrement());
+            clients.put(client.getId(), client);
+            trLogger.save(client);
+            return client.getId();
         }
-        clients.put(cl.getId(), cl);
     }
 
     private void awaitForInit() {
@@ -53,30 +56,10 @@ public class ClientService implements ClientRepository {
         }
     }
 
-    public void createClient(Client client) {
-        synchronized (indexer) {
-            client.setId(indexer.get());
-            clients.put(indexer.getAndIncrement(), client);
-            trLogger.save(client);
-        }
-    }
-
-    public void updateClient(Client srcClient, Client destClient) {
+    public void deleteClient(int id) {
         awaitForInit();
-        synchronized (srcClient){
-            int id = srcClient.getId();
-            srcClient = destClient;
-            srcClient.setId(id);
-            clients.put(srcClient.getId(), srcClient);
-            trLogger.save(srcClient);
-        }
-    }
-
-    public void deleteClient(Client client) {
-        synchronized (client) {
-            clients.remove(client.getId());
-            trLogger.markAsDeleted(client);
-        }
+        trLogger.markAsDeleted(clients.get(id));
+        clients.remove(id);
     }
 
     private Map<Integer, Client> readClients(Reader reader) {
@@ -100,6 +83,7 @@ public class ClientService implements ClientRepository {
     }
 
     public Map<Integer, Client> getClientsMap() {
+        awaitForInit();
         return Collections.unmodifiableMap(clients);
     }
 }

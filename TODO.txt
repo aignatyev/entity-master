@@ -11,7 +11,7 @@
 + search by substring (guava filter, Predicate)
 + measure 1 mln transactions performance
 
-Collections.unmodifiableMap -> don't expose internal state
++ Collections.unmodifiableMap -> don't expose internal state
 
 Use local resource refs _only_ under target or generated subfolder (new File( "./target/" + CLIENT_REPOSITORY_LOG_CSV);)
 Separator should not be hardcoded, at least use /

@@ -10,8 +10,6 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ClientRepository {
-    public void createClient(Client client);
     public Map<Integer, Client> getClientsMap();
-    public void updateClient(Client srcClient, Client destClient);
-    public void deleteClient(Client client);
+    public void deleteClient(int id);
 }
