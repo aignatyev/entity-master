@@ -13,7 +13,7 @@
 
 + Collections.unmodifiableMap -> don't expose internal state
 
-Use local resource refs _only_ under target or generated subfolder (new File( "./target/" + CLIENT_REPOSITORY_LOG_CSV);)
++ Use local resource refs _only_ under target or generated subfolder (new File( "./target/" + CLIENT_REPOSITORY_LOG_CSV);)
 Separator should not be hardcoded, at least use /
 
 use [http://en.wikipedia.org/wiki/Strategy_pattern] for Transaction Log write / flush: implement 
@@ -21,7 +21,7 @@ use [http://en.wikipedia.org/wiki/Strategy_pattern] for Transaction Log write / 
 -fixed transaction number
 -delegating (delegates everything to Writer)
 
-createClient / updateClient -> saveClient
++ createClient / updateClient -> saveClient
 
 http://en.wikipedia.org/wiki/Template_method_pattern - for atomic updates
 

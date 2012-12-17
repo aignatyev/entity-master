@@ -1,6 +1,7 @@
 package edu.entitymaster.dao;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,14 +15,21 @@ import java.util.concurrent.Executors;
  */
 public class TrLogger {
     private Writer writer;
+    private OutputStream outputStream;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public TrLogger(Writer writer) {
+    public TrLogger() {
+    }
+
+    public TrLogger(Writer writer, OutputStream outputStream) {
         this.writer = writer;
+        this.outputStream = outputStream;
     }
 
     public void save(Client client) {
         try {
+//            byte[] buf = (client.toString() + '\n').getBytes();
+//            outputStream.write(buf);
             writer.append(client.toString() + '\n');
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,6 +45,7 @@ public class TrLogger {
     class FlushToLog implements Runnable {
         public void run() {
             try {
+//                writer.write(outputStream.toString
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -1,14 +1,10 @@
-import com.google.common.io.Resources;
 import edu.entitymaster.dao.Client;
 import edu.entitymaster.dao.ClientService;
 import edu.entitymaster.dao.TrLogger;
 import edu.entitymaster.logic.ClientSearch;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -28,14 +24,16 @@ public class TestClientSearch {
     File f = new File( "./" + CLIENT_REPOSITORY_LOG_CSV);
     BufferedWriter bufferedWriter;
     ClientSearch clientSearch;
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
     {
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(f));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService(new TrLogger(bufferedWriter));
-        clientService.createClient(client);
+        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream));
+        clientService.saveClient(client);
         clientSearch = new ClientSearch(clientService);
     }
 

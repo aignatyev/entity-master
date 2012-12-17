@@ -29,6 +29,7 @@ public class TestClientService {
     Client client = new Client("test");
     File f = new File("./ClientRepositoryLog.csv");
     BufferedWriter bufferedWriter;
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     {
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(f));
@@ -46,7 +47,7 @@ public class TestClientService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService(new TrLogger(bufferedWriter));
+        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream));
     }
 
     @After
@@ -86,7 +87,7 @@ public class TestClientService {
     public void testReadOldRepo() throws InterruptedException, FileNotFoundException {
         int id = clientService.saveClient(client);
         Thread.sleep(3000); //wait for client to flush
-        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter), new FileReader(f));
+        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream), new FileReader(f));
         Assert.assertThat(clientService2.getClientsMap().size(), CoreMatchers.is(1));
         Assert.assertEquals("test", clientService2.getClientsMap().get(id).getName());
     }
@@ -140,10 +141,9 @@ public class TestClientService {
             }
         }
         System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to write");
-        ClientService clientService2;
         try {
             start = Calendar.getInstance().getTimeInMillis();
-            clientService2 = new ClientService(new TrLogger(new FileWriter(f, true)), new FileReader(f));
+            ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream), new FileReader(f));
             System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to read");
 
         } catch (IOException e) {
