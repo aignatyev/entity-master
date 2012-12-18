@@ -18,9 +18,6 @@ public class TrLogger {
     private OutputStream outputStream;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public TrLogger() {
-    }
-
     public TrLogger(Writer writer, OutputStream outputStream) {
         this.writer = writer;
         this.outputStream = outputStream;

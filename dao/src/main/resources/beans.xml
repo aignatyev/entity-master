@@ -11,7 +11,8 @@
     </bean>
 
     <bean id="trLogger" class="edu.entitymaster.dao.TrLogger">
-        <property name="writer" ref="bufferedWriter"/>
+        <constructor-arg index="0" ref="bufferedWriter"/>
+        <constructor-arg index="1" ref="byteArrayOutputStream"/>
     </bean>
 
     <bean id="bufferedWriter" class="java.io.BufferedWriter">
@@ -19,8 +20,13 @@
     </bean>
 
     <bean id="fileWriter" class="java.io.FileWriter">
-        <constructor-arg type="java.lang.String" value="./ClientRepositoryLog.csv"/>
+        <constructor-arg type="java.lang.String" value="./ClientRepositoryLog.csv"/>    <!--???-->
     </bean>
-    <bean id="initialReader" class="java.io.FileReader"/>
+
+    <bean id="initialReader" class="java.io.FileReader">
+        <constructor-arg type="java.lang.String" value=""/> <!--???-->
+    </bean>
+
+    <bean id="byteArrayOutputStream" class="java.io.ByteArrayOutputStream"/>
 
 </beans>
