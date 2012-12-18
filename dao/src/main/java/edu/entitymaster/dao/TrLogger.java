@@ -42,6 +42,10 @@ public class TrLogger {
         save(client.setId(-client.getId()));
     }
 
+    public void setWriter(Writer writer) {
+        this.writer = writer;
+    }
+
     class FlushToLog implements Runnable {
         public void run() {
             try {

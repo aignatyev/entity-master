@@ -86,4 +86,8 @@ public class ClientService implements ClientRepository {
         awaitForInit();
         return Collections.unmodifiableMap(clients);
     }
+
+    public void setTrLogger(TrLogger trLogger) {
+        this.trLogger = trLogger;
+    }
 }

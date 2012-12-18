@@ -5,12 +5,22 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="ClientService" class="edu.entitymaster.dao.ClientService">
-        <property name="trLogger">
-            <bean id="TrLogger" class="edu.entitymaster.dao.TrLogger">
-
-            </bean>
-        </property>
+    <bean id="clientService" class="edu.entitymaster.dao.ClientService">
+        <constructor-arg index="0" ref="trLogger"/>
+        <constructor-arg index="1" ref="initialReader"/>
     </bean>
+
+    <bean id="trLogger" class="edu.entitymaster.dao.TrLogger">
+        <property name="writer" ref="bufferedWriter"/>
+    </bean>
+
+    <bean id="bufferedWriter" class="java.io.BufferedWriter">
+        <constructor-arg ref="fileWriter"/>
+    </bean>
+
+    <bean id="fileWriter" class="java.io.FileWriter">
+        <constructor-arg type="java.lang.String" value="./ClientRepositoryLog.csv"/>
+    </bean>
+    <bean id="initialReader" class="java.io.FileReader"/>
 
 </beans>
