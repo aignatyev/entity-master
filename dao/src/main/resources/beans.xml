@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:property-placeholder location="em.properties"/>
 
     <bean id="clientService" class="edu.entitymaster.dao.ClientService">
         <constructor-arg index="0" ref="trLogger"/>
@@ -20,11 +23,11 @@
     </bean>
 
     <bean id="fileWriter" class="java.io.FileWriter">
-        <constructor-arg type="java.lang.String" value="./ClientRepositoryLog.csv"/>    <!--???-->
+        <constructor-arg type="java.lang.String" value="${em.repository}"/>
     </bean>
 
     <bean id="initialReader" class="java.io.FileReader">
-        <constructor-arg type="java.lang.String" value=""/> <!--???-->
+        <constructor-arg type="java.lang.String" value="${em.repository}"/>
     </bean>
 
     <bean id="byteArrayOutputStream" class="java.io.ByteArrayOutputStream"/>
