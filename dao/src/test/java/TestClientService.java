@@ -3,7 +3,9 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import edu.entitymaster.dao.Client;
 import edu.entitymaster.dao.ClientService;
-import edu.entitymaster.dao.TrLogger;
+import edu.entitymaster.dao.logger.LogStrategy;
+import edu.entitymaster.dao.logger.LogStrategyImplFixedWidth;
+import edu.entitymaster.dao.logger.TrLogger;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,6 +32,8 @@ public class TestClientService {
     File f = new File("./ClientRepositoryLog.csv");
     BufferedWriter bufferedWriter;
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    LogStrategy logStrategy = new LogStrategyImplFixedWidth(bufferedWriter);
+
     {
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(f));
@@ -47,7 +51,7 @@ public class TestClientService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream));
+        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream, logStrategy));
     }
 
     @After
@@ -87,7 +91,7 @@ public class TestClientService {
     public void testReadOldRepo() throws InterruptedException, FileNotFoundException {
         int id = clientService.saveClient(client);
         Thread.sleep(3000); //wait for client to flush
-        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream), new FileReader(f));
+        ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream, logStrategy), new FileReader(f));
         Assert.assertThat(clientService2.getClientsMap().size(), CoreMatchers.is(1));
         Assert.assertEquals("test", clientService2.getClientsMap().get(id).getName());
     }
@@ -143,7 +147,7 @@ public class TestClientService {
         System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to write");
         try {
             start = Calendar.getInstance().getTimeInMillis();
-            ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream), new FileReader(f));
+            ClientService clientService2 = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream, logStrategy), new FileReader(f));
             System.out.println(Calendar.getInstance().getTimeInMillis() - start + " took to read");
 
         } catch (IOException e) {

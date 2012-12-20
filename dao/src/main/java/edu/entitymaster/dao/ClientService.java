@@ -1,6 +1,7 @@
 package edu.entitymaster.dao;
 
 import com.google.gson.Gson;
+import edu.entitymaster.dao.logger.TrLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -13,7 +13,7 @@
         <constructor-arg index="1" ref="initialReader"/>
     </bean>
 
-    <bean id="trLogger" class="edu.entitymaster.dao.TrLogger">
+    <bean id="trLogger" class="edu.entitymaster.dao.logger.TrLogger">
         <constructor-arg index="0" ref="bufferedWriter"/>
         <constructor-arg index="1" ref="byteArrayOutputStream"/>
     </bean>

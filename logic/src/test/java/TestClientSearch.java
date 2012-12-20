@@ -1,6 +1,6 @@
 import edu.entitymaster.dao.Client;
 import edu.entitymaster.dao.ClientService;
-import edu.entitymaster.dao.TrLogger;
+import edu.entitymaster.dao.logger.TrLogger;
 import edu.entitymaster.logic.ClientSearch;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ public class TestClientSearch {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream));
+        clientService = new ClientService(new TrLogger(bufferedWriter, byteArrayOutputStream, logStrategy));
         clientService.saveClient(client);
         clientSearch = new ClientSearch(clientService);
     }

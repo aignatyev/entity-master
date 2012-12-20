@@ -1,4 +1,6 @@
-package edu.entitymaster.dao;
+package edu.entitymaster.dao.logger;
+
+import edu.entitymaster.dao.Client;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,16 +19,16 @@ public class TrLogger {
     private Writer writer;
     private OutputStream outputStream;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private LogStrategy logStrategy;
 
-    public TrLogger(Writer writer, OutputStream outputStream) {
+    public TrLogger(Writer writer, OutputStream outputStream, LogStrategy logStrategy) {
         this.writer = writer;
         this.outputStream = outputStream;
+        this.logStrategy = logStrategy;
     }
 
     public void save(Client client) {
         try {
-//            byte[] buf = (client.toString() + '\n').getBytes();
-//            outputStream.write(buf);
             writer.append(client.toString() + '\n');
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,19 +41,14 @@ public class TrLogger {
         save(client.setId(-client.getId()));
     }
 
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
-
     class FlushToLog implements Runnable {
         public void run() {
-            try {
-//                writer.write(outputStream.toString
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            logStrategy.flush();
         }
+    }
+
+    public void setWriter(Writer writer) {
+        this.writer = writer;
     }
 
 }
